@@ -49,7 +49,55 @@
 [merge]
     conflictstyle = zdiff3
 
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+
 [alias]
+    # List all git aliases with their descriptions
+    # Usage: git alias-ls [filter]
+    alias-ls = "!f() { \
+        FILTER=$1; \
+        echo \"Git Aliases\"; \
+        if [ -n \"$FILTER\" ]; then \
+            echo \"Filtered by: $FILTER\"; \
+        fi; \
+        echo \"===========\"; \
+        echo \"\"; \
+        config_file=\"$HOME/.gitconfig\"; \
+        git config --get-regexp \"^alias\\.\" | while read alias_line; do \
+            alias_name=$(echo $alias_line | cut -d. -f2 | cut -d' ' -f1); \
+            if [ -n \"$FILTER\" ] && ! echo $alias_name | grep -qi $FILTER; then \
+                continue; \
+            fi; \
+            if [ -f \"$config_file\" ]; then \
+                line_num=$(grep -n \"^[[:space:]]*$alias_name[[:space:]]*=\" \"$config_file\" | cut -d: -f1); \
+                if [ -n \"$line_num\" ]; then \
+                    comments=$(sed -n \"$((line_num-5)),$((line_num-1))p\" \"$config_file\" | grep \"^[[:space:]]*#\" | sed 's/^[[:space:]]*#[[:space:]]*//'); \
+                    description=$(echo \"$comments\" | grep -v \"^Usage:\" | grep -v \"^Example:\" | tr '\\n' ' ' | sed 's/[[:space:]]*$//'); \
+                    usage=$(echo \"$comments\" | grep \"^Usage:\" | head -1); \
+                    if [ -n \"$description\" ]; then \
+                        printf \"%-15s %s\\n\" \"$alias_name\" \"$description\"; \
+                        if [ -n \"$usage\" ]; then \
+                            printf \"%-15s %s\\n\" \"\" \"$usage\"; \
+                        fi; \
+                    else \
+                        printf \"%-15s (no description)\\n\" \"$alias_name\"; \
+                    fi; \
+                else \
+                    printf \"%-15s (not found in config)\\n\" \"$alias_name\"; \
+                fi; \
+            else \
+                echo \"Config file not found: $config_file\"; \
+            fi; \
+            echo \"\"; \
+        done; \
+    }; f"
+
+    # Check the signature on commits 
+    # Usage: git sig-check 
     sig-check = "!f() { \
         git log --all --color --graph --pretty=format:'%C(bold yellow)<sig>%G?</sig>%C(reset) %C(red)%h%C(reset) -%C(yellow)%d%C(reset) %s %C(green)(%cr) %C(blue)<%an>%C(reset)' | \
         sed -e 's#<sig>G</sig>#Good#' \
@@ -64,6 +112,9 @@
         unset f; \
     }; f"
 
+    # Take the latest commit off the remote branch, which rewrites history, and
+    # put it back in the local changes
+    # Usage: git oopsie
     oopsie = "!f() { \
         echo \"\\033[1;33mDANGER! You sure you want to rewrite remote history? (y/n): \\033[0m\\c\"; \
         read confirm; \
@@ -77,15 +128,36 @@
         git stash pop; \
         unset f; \
     }; f"
+    
+    # Squash all commits on a branch into one commit from the branching point
+    # with `main` by default.
+    # Usage: git fast-squash [base=main]
+    fast-squash = "!f() { \
+        base=$(git merge-base ${1:-main} HEAD); \
+        echo "Branching point: $base"; \
+        echo "Current commit message: $(git log --format=%B -n 1 HEAD)"; \
+        read -p "Enter new commit message (leave empty to keep current): " new_msg; \
+        if [ -z "$new_msg" ]; then \
+            new_msg=$(git log --format=%B -n 1 HEAD | head -n 1); \
+        fi; \
+        git reset --soft $base; \
+        git commit -m "$new_msg"; \
+    }; f"
 
+    # Create new branch with one third the characters
+    # Usage: git new [branch-name]
     new = switch -c
 
+    # Delete branch quickly 
+    # Usage: git del [branch-name]
     del = "!f() { \
         git switch -; \
         git branch -D \"$1\"; \
         unset f; \
     }; f"
 
+    # Remove all branches without a remote counterpart
+    # Usage: git prune-branches
     prune-branches = "!f() { \
         git switch main && git fetch -p && \
         for branch in $(git branch -vv | grep \": gone]\" | awk '{print $1}'); do \
@@ -95,8 +167,13 @@
         unset f; \
     }; f"
 
+    # Show nice representation of git history in graph form
+    # Usage: git graph
     graph = log --graph --oneline --decorate --branches --tags
 
+    # Show statistics of user in current repository, username defaults to
+    # currently configured git user
+    # Usage: git stats [username]
     stats = "!f() { \
         if [ -z \"$1\" ]; then \
             AUTHOR=$(git config --local user.name); \
@@ -137,6 +214,8 @@
         unset f; \
     }; f"
 
+    # Find a branch by (partial) name
+    # Usage: git find-branch [search] 
     find-branch = "!f() { \
         branches=$(git branch --list | grep \"$1\"); \
         if [ -z \"$branches\" ]; then \
@@ -146,4 +225,3 @@
         fi; \
         unset f; \
     }; f"
-
