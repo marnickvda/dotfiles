@@ -30,7 +30,7 @@ return {
                 },
             },
             formatters_by_ft = {
-                zsh = { "shfmt" },
+                zsh = { "beautysh" },
                 bash = { "shfmt" },
                 sh = { "shfmt" },
                 javascript = { "prettier" },
