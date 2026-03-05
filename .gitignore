@@ -1,2 +1,4 @@
 .config/zsh/profiles/*
 .config/iterm2/AppSupport
+
+.DS_Store

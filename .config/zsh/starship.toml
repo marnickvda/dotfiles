@@ -72,7 +72,7 @@ $spack\
 $memory_usage\
 $kubernetes\
 $aws\
-$gcloud\
+ $gcloud\
 $openstack\
 $azure\
 $nats\
@@ -93,6 +93,10 @@ $container\
 $netns\
 $shell\
 $character"""
+
+[character]
+success_symbol = "[⚡](bold yellow)"
+error_symbol = "[⚡](bold red)"
 
 [directory]
 read_only = " 󱀰"
