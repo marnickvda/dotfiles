@@ -1,0 +1,3 @@
+[submodule ".config/zsh/profiles"]
+	path = .config/zsh/profiles
+	url = git@github.com:marnickvda/dotfiles-zsh-profiles.git
