@@ -1,3 +1,6 @@
+[include]
+    path = ~/.config/git/credentials
+
 [core]
     editor = nvim
     pager = delta
@@ -13,9 +16,7 @@
 
 [user]
 	name = Marnick van der Arend
-	email = marnick@vdarend.com
-	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJbiNxqVL7mCwNF/haSD2MGI0ztglsXAJCNPatZmlgnE
-    
+
 [github]
     user = marnickvda
 
