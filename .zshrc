@@ -71,12 +71,3 @@ brew() {
         disown
     fi
 }
-
-# bun completions
-[ -s "/Users/marnick.van.der.arend/.bun/_bun" ] && source "/Users/marnick.van.der.arend/.bun/_bun"
-
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-export PATH="/Library/Frameworks/Python.framework/Versions/3.12/bin:$PATH"
-export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
