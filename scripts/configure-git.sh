@@ -1,6 +1,4 @@
-echo "🧰 Configuring .git configuration"
-
-cp $HOME/dotfiles/.gitconfig $HOME/.gitconfig
+echo "Configuring git credentials"
 
 touch $HOME/.zshenv
 source $HOME/.zshenv
@@ -23,7 +21,7 @@ if ! grep -q "export GIT_SIGNING_KEY=" ~/.zshenv; then
     echo "export GIT_SIGNING_KEY=\"$GIT_SIGNING_KEY\"" >> $HOME/.zshenv
 fi
 
-git config --global user.email "$GIT_AUTHOR_EMAIL" 
-git config --global user.signingkey "$GIT_SIGNING_KEY" 
+git config --global user.email "$GIT_AUTHOR_EMAIL"
+git config --global user.signingkey "$GIT_SIGNING_KEY"
 
-echo "✅ Git configuration updated."
+echo "Git configuration updated."
