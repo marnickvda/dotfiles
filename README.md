@@ -23,9 +23,9 @@ modularity in its configuration.
 1. Manually install Go `https://go.dev/dl/`
 1. Import iTerm2 profile from `.config/iterm2/iterm2-profile.json` into iTerm2. 
 
-### Updating .gitconfig
+### Updating git config
 
-1. If exists, backup the existing `.gitconfig` via `cp $HOME/.gitconfig
-   $HOME/.gitconfig.backup`
-1. Make changes in `./.gitconfig`
-1. Run `./scripts/configure-git.sh` to synchronize changes with correct credentials
+Git config lives at `.config/git/config` (XDG standard). Stow symlinks it to `~/.config/git/config`.
+Edit it directly — changes take effect immediately since it's symlinked.
+
+To update credentials, run `./scripts/configure-git.sh`.

@@ -1,3 +1,6 @@
+[include]
+    path = ~/.config/git/credentials
+
 [core]
     editor = nvim
     pager = delta
@@ -13,7 +16,7 @@
 
 [user]
 	name = Marnick van der Arend
-    
+
 [github]
     user = marnickvda
 
@@ -66,7 +69,7 @@
         fi; \
         echo \"===========\"; \
         echo \"\"; \
-        config_file=\"$HOME/.gitconfig\"; \
+        config_file=\"$HOME/.config/git/config\"; \
         git config --get-regexp \"^alias\\.\" | while read alias_line; do \
             alias_name=$(echo $alias_line | cut -d. -f2 | cut -d' ' -f1); \
             if [ -n \"$FILTER\" ] && ! echo $alias_name | grep -qi $FILTER; then \
