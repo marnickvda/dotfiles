@@ -148,11 +148,7 @@ M.open = function()
       prompt_title = "Skill Issue",
       finder = finders.new_table({
         results = all_entries,
-        entry_maker = function(entry)
-          local prefix = entry.type == "plugin" and "[plugin]" or "[keymap]"
-          local hl = entry.type == "plugin" and "TelescopeResultsIdentifier" or "TelescopeResultsComment"
-          local rest = entry.display:sub(#prefix + 2) -- skip prefix + space
-
+        entry_maker = (function()
           local displayer = entry_display.create({
             separator = " ",
             items = {
@@ -161,17 +157,23 @@ M.open = function()
             },
           })
 
-          return {
-            value = entry,
-            display = function()
-              return displayer({
-                { prefix, hl },
-                rest,
-              })
-            end,
-            ordinal = entry.display,
-          }
-        end,
+          return function(entry)
+            local prefix = entry.type == "plugin" and "[plugin]" or "[keymap]"
+            local hl = entry.type == "plugin" and "TelescopeResultsIdentifier" or "TelescopeResultsComment"
+            local rest = entry.display:sub(#prefix + 2) -- skip prefix + space
+
+            return {
+              value = entry,
+              display = function()
+                return displayer({
+                  { prefix, hl },
+                  rest,
+                })
+              end,
+              ordinal = entry.display,
+            }
+          end
+        end)(),
       }),
       sorter = conf.generic_sorter({}),
       previewer = make_previewer(),

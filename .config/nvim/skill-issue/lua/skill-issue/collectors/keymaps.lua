@@ -47,7 +47,6 @@ end
 M.collect = function(declared_keymaps)
   -- Key: "mode|lhs" -> entry (for deduplication)
   local seen = {}
-  local entries = {}
 
   -- 1. Collect buffer-local keymaps (highest priority)
   for _, mode in ipairs(MODES) do
@@ -75,7 +74,10 @@ M.collect = function(declared_keymaps)
 
   -- 2. Collect global keymaps (lower priority, skip if buffer-local exists)
   for _, mode in ipairs(MODES) do
-    local maps = vim.api.nvim_get_keymap(mode)
+    local ok2, maps = pcall(vim.api.nvim_get_keymap, mode)
+    if not ok2 then
+      maps = {}
+    end
     for _, km in ipairs(maps) do
       if km.desc and km.desc ~= "" and not km.lhs:find("<Plug>") then
         local dedup_key = mode .. "|" .. km.lhs
@@ -124,12 +126,13 @@ M.collect = function(declared_keymaps)
   end
 
   -- Build display strings and collect
+  local results = {}
   for _, entry in pairs(seen) do
     entry.display = "[keymap] " .. entry.key .. "  " .. entry.mode .. "  " .. entry.desc
-    table.insert(entries, entry)
+    table.insert(results, entry)
   end
 
-  return entries
+  return results
 end
 
 return M
