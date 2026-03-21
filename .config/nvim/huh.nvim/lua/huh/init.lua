@@ -5,7 +5,7 @@ M.setup = function(opts)
 end
 
 M.pick = function()
-  require("skill-issue.picker").open()
+  require("huh.picker").open()
 end
 
 return M

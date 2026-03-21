@@ -5,9 +5,9 @@ local previewers = require("telescope.previewers")
 local entry_display = require("telescope.pickers.entry_display")
 local conf = require("telescope.config").values
 
-local plugins_collector = require("skill-issue.collectors.plugins")
-local keymaps_collector = require("skill-issue.collectors.keymaps")
-local commands_collector = require("skill-issue.collectors.commands")
+local plugins_collector = require("huh.collectors.plugins")
+local keymaps_collector = require("huh.collectors.keymaps")
+local commands_collector = require("huh.collectors.commands")
 
 local M = {}
 
@@ -240,7 +240,6 @@ local function make_previewer()
 				local km_lines, km_hls = build_card("Keymap", keymap_fields, width)
 				vim.list_extend(lines, km_lines)
 				vim.list_extend(card_hls, km_hls)
-
 			end
 
 			-- Plugin help docs
@@ -260,7 +259,7 @@ local function make_previewer()
 			vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
 
 			-- Apply card highlights
-			local ns = vim.api.nvim_create_namespace("skill_issue_preview")
+			local ns = vim.api.nvim_create_namespace("huh_preview")
 			vim.api.nvim_buf_clear_namespace(self.state.bufnr, ns, 0, -1)
 			for _, hl in ipairs(card_hls) do
 				vim.api.nvim_buf_add_highlight(self.state.bufnr, ns, hl[4], hl[1], hl[2], hl[3])
@@ -303,7 +302,7 @@ local function make_previewer()
 	})
 end
 
---- Open the skill-issue picker
+--- Open the huh picker
 M.open = function()
 	local context = detect_context()
 

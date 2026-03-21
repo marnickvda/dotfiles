@@ -1,7 +1,7 @@
-# skill-issue
+# huh.nvim
 
-Fuzzy search your Neovim plugins and keybindings. Press `<leader>huh` when you forget what you installed or how to use
-it.
+Fuzzy search your Neovim plugins, keymaps, and commands. Press `<leader>huh` when you forget what you installed or how
+to use it.
 
 ## What it does
 
@@ -12,18 +12,15 @@ it.
 
 ## Setup
 
-Local plugin, loaded via lazy.nvim `dir`:
-
 ```lua
 {
-  "skill-issue",
-  dir = vim.fn.stdpath("config") .. "/skill-issue",
+  "marnickvda/huh.nvim",
   dependencies = { "nvim-telescope/telescope.nvim" },
   keys = {
-    { "<leader>huh", function() require("skill-issue").pick() end, desc = "Skill Issue: fuzzy search plugins & keymaps" },
+    { "<leader>huh", function() require("huh").pick() end, desc = "huh: fuzzy search plugins, keymaps & commands" },
   },
   config = function()
-    require("skill-issue").setup()
+    require("huh").setup()
   end,
 }
 ```
