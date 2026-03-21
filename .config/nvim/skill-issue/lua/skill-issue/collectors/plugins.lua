@@ -36,8 +36,6 @@ M.collect = function()
       plugin = name,
       source_file = source_file,
       source_line = nil,
-      tags = {},
-      tip = nil,
       plugin_dir = plugin.dir,
     })
 
@@ -74,8 +72,6 @@ M.collect = function()
               mode = m,
               desc = key_desc,
               plugin = name,
-              tags = {},
-              tip = nil,
               source_file = source_file,
             })
           end

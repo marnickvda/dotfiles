@@ -200,12 +200,7 @@ local function make_previewer()
 			local card_hls = {}
 
 			if e.type == "plugin" then
-				local fields = {}
-				table.insert(fields, e.plugin or "unknown")
-				if e.tip then
-					table.insert(fields, "")
-					table.insert(fields, e.tip)
-				end
+				local fields = { e.plugin or "unknown" }
 				local card_lines, hls = build_card("Plugin", fields, width)
 				vim.list_extend(lines, card_lines)
 				vim.list_extend(card_hls, hls)
@@ -246,19 +241,6 @@ local function make_previewer()
 				vim.list_extend(lines, km_lines)
 				vim.list_extend(card_hls, km_hls)
 
-				-- Plugin description card below (if plugin is known)
-				if e.plugin and e.tip then
-					table.insert(lines, "")
-					local offset = #lines
-					local desc_fields = { e.plugin, "", e.tip }
-					local desc_lines, desc_hls = build_card("Plugin", desc_fields, width)
-					-- Offset highlight line numbers
-					for _, hl in ipairs(desc_hls) do
-						hl[1] = hl[1] + offset
-					end
-					vim.list_extend(lines, desc_lines)
-					vim.list_extend(card_hls, desc_hls)
-				end
 			end
 
 			-- Plugin help docs
@@ -336,7 +318,7 @@ M.open = function()
 
 	-- Build lookups from plugin entries
 	local plugin_dirs = {} -- plugin name -> install dir
-	local source_to_plugin = {} -- spec source file -> { name, dir, tags, tip }
+	local source_to_plugin = {} -- spec source file -> { name, dir }
 	for _, e in ipairs(plugin_entries) do
 		if e.plugin then
 			if e.plugin_dir then
@@ -346,8 +328,6 @@ M.open = function()
 				source_to_plugin[e.source_file] = {
 					name = e.plugin,
 					dir = e.plugin_dir,
-					tags = e.tags,
-					tip = e.tip,
 				}
 			end
 		end
@@ -361,8 +341,6 @@ M.open = function()
 			if info then
 				e.plugin = info.name
 				e.plugin_dir = info.dir
-				e.tags = info.tags or e.tags
-				e.tip = info.tip or e.tip
 			else
 				-- 2. Prefix match: source_file is INSIDE a plugin's install dir
 				-- (e.g., callback is a direct reference to a plugin function)
@@ -411,6 +389,22 @@ M.open = function()
 						},
 					})
 
+					local keymap_displayer = entry_display.create({
+						separator = "",
+						items = {
+							{ width = 9 }, -- "[keymap] "
+							{ width = 1 }, -- "["
+							{ width = 1 }, -- n
+							{ width = 1 }, -- v
+							{ width = 1 }, -- i
+							{ width = 1 }, -- o
+							{ width = 1 }, -- s
+							{ width = 2 }, -- "] "
+							{ width = 15 }, -- key combo
+							{ remaining = true }, -- description
+						},
+					})
+
 					return function(entry)
 						if entry.type == "plugin" then
 							return {
@@ -437,21 +431,6 @@ M.open = function()
 								ordinal = entry.ordinal or entry.display,
 							}
 						else
-							local keymap_displayer = entry_display.create({
-								separator = "",
-								items = {
-									{ width = 9 }, -- "[keymap] "
-									{ width = 1 }, -- "["
-									{ width = 1 }, -- n
-									{ width = 1 }, -- v
-									{ width = 1 }, -- i
-									{ width = 1 }, -- o
-									{ width = 1 }, -- s
-									{ width = 2 }, -- "] "
-									{ width = 15 }, -- key combo
-									{ remaining = true }, -- description
-								},
-							})
 
 							local mode = entry.mode or "_____"
 							local function char_hl(idx)
@@ -493,8 +472,8 @@ M.open = function()
 							local keys = vim.api.nvim_replace_termcodes(e.key, true, false, true)
 							vim.api.nvim_feedkeys(keys, "m", false)
 						elseif e.type == "command" and e.command_name then
-							if e.nargs == "0" then
-								vim.cmd(e.command_name)
+							if e.nargs == "0" then -- nargs is a string from nvim_get_commands
+								vim.cmd[e.command_name]()
 							else
 								-- Open command line with the command pre-filled so user can add args
 								vim.api.nvim_feedkeys(":" .. e.command_name .. " ", "n", false)

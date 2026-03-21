@@ -75,8 +75,6 @@ M.collect = function(plugin_dirs)
           plugin_dir = plugin_dir,
           source_file = nil,
           source_line = nil,
-          tags = {},
-          tip = nil,
           command_name = name,
           nargs = cmd.nargs,
         })
@@ -103,8 +101,6 @@ M.collect = function(plugin_dirs)
           plugin_dir = plugin_dir,
           source_file = nil,
           source_line = nil,
-          tags = {},
-          tip = nil,
           command_name = name,
           nargs = cmd.nargs,
         })

@@ -80,7 +80,6 @@ M.collect = function(declared_keymaps)
             source_line = source_line,
             plugin = nil,
             tags = infer_tags(km.desc),
-            tip = nil,
           }
         end
       end
@@ -95,7 +94,7 @@ M.collect = function(declared_keymaps)
     end
     for _, km in ipairs(maps) do
       if km.desc and km.desc ~= "" and not km.lhs:find("<Plug>") then
-        local dedup_key = mode .. "|" .. km.lhs
+        local dedup_key = mode .. "|" .. canonical_lhs(km.lhs)
         if not seen[dedup_key] then
           local source_file, source_line = get_source_info(km)
           seen[dedup_key] = {
@@ -107,7 +106,6 @@ M.collect = function(declared_keymaps)
             source_line = source_line,
             plugin = nil,
             tags = infer_tags(km.desc),
-            tip = nil,
           }
         end
       end
@@ -126,16 +124,13 @@ M.collect = function(declared_keymaps)
         source_file = dk.source_file,
         source_line = nil,
         plugin = dk.plugin,
-        tags = dk.tags or {},
-        tip = dk.tip,
+        tags = {},
       }
     else
       -- Enrich existing entry with plugin info if missing
       local existing = seen[dedup_key]
       if not existing.plugin and dk.plugin then
         existing.plugin = dk.plugin
-        existing.tags = dk.tags or existing.tags
-        existing.tip = dk.tip or existing.tip
       end
     end
   end
@@ -147,11 +142,9 @@ M.collect = function(declared_keymaps)
     if by_key[canon] then
       -- Add mode to existing entry
       by_key[canon].modes[entry.mode] = true
-      -- Prefer enriched data (plugin info, tags, tip)
+      -- Prefer enriched data (plugin info)
       if not by_key[canon].plugin and entry.plugin then
         by_key[canon].plugin = entry.plugin
-        by_key[canon].tags = entry.tags
-        by_key[canon].tip = entry.tip
         by_key[canon].plugin_dir = entry.plugin_dir
       end
     else
