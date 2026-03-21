@@ -1,5 +1,3 @@
-local tags_table = require("skill-issue.tags")
-
 local M = {}
 
 --- Collect all plugins from lazy.nvim and return unified entries + declared keys
@@ -11,8 +9,7 @@ M.collect = function()
 
   for _, plugin in ipairs(plugins) do
     local name = plugin.name
-    local tag_info = tags_table[name] or {}
-    local desc = tag_info.tip or plugin.url or name
+    local desc = plugin.url or name
 
     -- Find the spec file by scanning config for a file matching the plugin name
     -- This is more reliable than lazy.nvim internals for directory-based imports
@@ -39,8 +36,8 @@ M.collect = function()
       plugin = name,
       source_file = source_file,
       source_line = nil,
-      tags = tag_info.tags or {},
-      tip = tag_info.tip,
+      tags = {},
+      tip = nil,
       plugin_dir = plugin.dir,
     })
 
@@ -77,8 +74,8 @@ M.collect = function()
               mode = m,
               desc = key_desc,
               plugin = name,
-              tags = tag_info.tags or {},
-              tip = tag_info.tip,
+              tags = {},
+              tip = nil,
               source_file = source_file,
             })
           end

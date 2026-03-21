@@ -172,6 +172,8 @@ M.collect = function(declared_keymaps)
     local s = has["s"] and "s" or "_"
     entry.mode = n .. v .. i .. o .. s
     entry.display = "[keymap] " .. entry.key .. "  " .. entry.mode .. "  " .. entry.desc
+    -- Include plugin name in ordinal so fuzzy search by plugin name finds associated keymaps
+    entry.ordinal = entry.display .. (entry.plugin and ("  " .. entry.plugin) or "")
     table.insert(results, entry)
   end
 

@@ -7,6 +7,7 @@ local conf = require("telescope.config").values
 
 local plugins_collector = require("skill-issue.collectors.plugins")
 local keymaps_collector = require("skill-issue.collectors.keymaps")
+local commands_collector = require("skill-issue.collectors.commands")
 
 local M = {}
 
@@ -58,9 +59,10 @@ local function sort_entries(entries, context)
 			return a_ctx
 		end
 
-		-- Tier 2: plugins before keymaps
+		-- Tier 2: plugins > commands > keymaps
 		if a.type ~= b.type then
-			return a.type == "plugin"
+			local order = { plugin = 1, command = 2, keymap = 3 }
+			return (order[a.type] or 9) < (order[b.type] or 9)
 		end
 
 		-- Tier 3: alphabetical by display
@@ -207,6 +209,22 @@ local function make_previewer()
 				local card_lines, hls = build_card("Plugin", fields, width)
 				vim.list_extend(lines, card_lines)
 				vim.list_extend(card_hls, hls)
+			elseif e.type == "command" then
+				local cmd_fields = {
+					"`:" .. (e.command_name or "") .. "`",
+					"",
+					"Args: " .. (e.nargs or "0"),
+				}
+				if e.plugin then
+					table.insert(cmd_fields, "Source: " .. e.plugin)
+				end
+				if e.desc and e.desc ~= "" then
+					table.insert(cmd_fields, "")
+					table.insert(cmd_fields, e.desc)
+				end
+				local cmd_lines, cmd_hls = build_card("Command", cmd_fields, width)
+				vim.list_extend(lines, cmd_lines)
+				vim.list_extend(card_hls, cmd_hls)
 			else
 				-- Keymap card first
 				local source
@@ -352,12 +370,6 @@ M.open = function()
 					if e.source_file:find(pdir, 1, true) == 1 then
 						e.plugin = pname
 						e.plugin_dir = pdir
-						local tags_table = require("skill-issue.tags")
-						local tag_info = tags_table[pname]
-						if tag_info then
-							e.tags = tag_info.tags or e.tags
-							e.tip = tag_info.tip or e.tip
-						end
 						break
 					end
 				end
@@ -366,6 +378,12 @@ M.open = function()
 		if e.plugin and not e.plugin_dir then
 			e.plugin_dir = plugin_dirs[e.plugin]
 		end
+	end
+
+	-- Collect commands and add to entries
+	local command_entries = commands_collector.collect(plugin_dirs)
+	for _, e in ipairs(command_entries) do
+		table.insert(all_entries, e)
 	end
 
 	sort_entries(all_entries, context)
@@ -384,6 +402,15 @@ M.open = function()
 						},
 					})
 
+					local cmd_displayer = entry_display.create({
+						separator = " ",
+						items = {
+							{ width = 8 }, -- [cmd]
+							{ width = 20 }, -- command name
+							{ remaining = true }, -- description/plugin
+						},
+					})
+
 					return function(entry)
 						if entry.type == "plugin" then
 							return {
@@ -394,7 +421,20 @@ M.open = function()
 										entry.plugin .. "  " .. (entry.desc or ""),
 									})
 								end,
-								ordinal = entry.display,
+								ordinal = entry.ordinal or entry.display,
+							}
+						elseif entry.type == "command" then
+							local desc = entry.plugin and (entry.plugin .. "  " .. entry.desc) or entry.desc or ""
+							return {
+								value = entry,
+								display = function()
+									return cmd_displayer({
+										{ "[cmd]", "DiagnosticWarn" },
+										{ ":" .. (entry.command_name or ""), "TelescopeResultsSpecialComment" },
+										desc,
+									})
+								end,
+								ordinal = entry.ordinal or entry.display,
 							}
 						else
 							local keymap_displayer = entry_display.create({
@@ -435,7 +475,7 @@ M.open = function()
 										entry.desc or "",
 									})
 								end,
-								ordinal = entry.display,
+								ordinal = entry.ordinal or entry.display,
 							}
 						end
 					end
@@ -447,10 +487,19 @@ M.open = function()
 				actions.select_default:replace(function()
 					local selection = require("telescope.actions.state").get_selected_entry()
 					actions.close(prompt_bufnr)
-					if selection and selection.value.type == "keymap" then
+					if selection then
 						local e = selection.value
-						local keys = vim.api.nvim_replace_termcodes(e.key, true, false, true)
-						vim.api.nvim_feedkeys(keys, "m", false)
+						if e.type == "keymap" then
+							local keys = vim.api.nvim_replace_termcodes(e.key, true, false, true)
+							vim.api.nvim_feedkeys(keys, "m", false)
+						elseif e.type == "command" and e.command_name then
+							if e.nargs == "0" then
+								vim.cmd(e.command_name)
+							else
+								-- Open command line with the command pre-filled so user can add args
+								vim.api.nvim_feedkeys(":" .. e.command_name .. " ", "n", false)
+							end
+						end
 					end
 				end)
 				return true
