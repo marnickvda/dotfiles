@@ -73,8 +73,6 @@ M.collect = function(plugin_dirs)
           desc = cmd.definition or "",
           plugin = plugin,
           plugin_dir = plugin_dir,
-          source_file = nil,
-          source_line = nil,
           command_name = name,
           nargs = cmd.nargs,
         })
@@ -99,8 +97,6 @@ M.collect = function(plugin_dirs)
           desc = cmd.definition or "",
           plugin = plugin,
           plugin_dir = plugin_dir,
-          source_file = nil,
-          source_line = nil,
           command_name = name,
           nargs = cmd.nargs,
         })

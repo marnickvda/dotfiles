@@ -88,15 +88,15 @@ end
 --- Wrap text to fit within a given width, preserving a prefix on each line
 local function wrap_text(text, width, prefix)
 	prefix = prefix or ""
-	local available = width - #prefix
-	if available <= 0 or #text <= available then
+	local available = width - vim.fn.strdisplaywidth(prefix)
+	if available <= 0 or vim.fn.strdisplaywidth(text) <= available then
 		return { prefix .. text }
 	end
 
 	local wrapped = {}
 	local remaining = text
 	while #remaining > 0 do
-		if #remaining <= available then
+		if vim.fn.strdisplaywidth(remaining) <= available then
 			table.insert(wrapped, prefix .. remaining)
 			break
 		end
@@ -266,10 +266,14 @@ local function make_previewer()
 				vim.api.nvim_buf_add_highlight(self.state.bufnr, ns, hl[4], hl[1], hl[2], hl[3])
 			end
 
-			-- Apply vimdoc treesitter highlighting for help docs
+			-- Apply vimdoc treesitter highlighting for help docs only
 			if doc_start then
-				local ok_ts, _ = pcall(vim.treesitter.start, self.state.bufnr, "vimdoc")
-				if not ok_ts then
+				-- Restrict treesitter to the doc region to avoid clobbering card highlights
+				local ok_ts, parser = pcall(vim.treesitter.get_parser, self.state.bufnr, "vimdoc")
+				if ok_ts and parser then
+					pcall(parser.set_included_regions, parser, { { { doc_start, 0, #lines - 1, 0 } } })
+					pcall(vim.treesitter.start, self.state.bufnr, "vimdoc")
+				else
 					-- Fallback: basic help syntax patterns
 					for i = doc_start, #lines - 1 do
 						local line = lines[i + 1]
@@ -431,7 +435,6 @@ M.open = function()
 								ordinal = entry.ordinal or entry.display,
 							}
 						else
-
 							local mode = entry.mode or "_____"
 							local function char_hl(idx)
 								local ch = mode:sub(idx, idx)
