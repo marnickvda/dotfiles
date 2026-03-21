@@ -1,5 +1,3 @@
-local tags_table = require("skill-issue.tags")
-
 local M = {}
 
 local MODES = { "n", "i", "x", "o", "s" }
@@ -41,6 +39,23 @@ local function get_source_info(keymap)
   return nil, nil
 end
 
+--- Replace resolved leader key back to <leader> for display
+--- Normalize lhs to a canonical form for both display and dedup
+local function normalize_lhs(lhs)
+  local leader = vim.g.mapleader or "\\"
+  if leader == " " then
+    lhs = lhs:gsub("^<Space>", "<leader>")
+    lhs = lhs:gsub("^ ", "<leader>")
+  end
+  return lhs
+end
+
+--- Convert lhs to a canonical byte form for dedup comparison
+--- This handles all encoding differences (literal space, <Space>, <leader>, etc.)
+local function canonical_lhs(lhs)
+  return vim.api.nvim_replace_termcodes(lhs, true, true, true)
+end
+
 --- Collect all keymaps from runtime + merge with lazy-declared keys
 --- @param declared_keymaps table[] keymaps extracted from lazy.nvim plugin specs
 --- @return table[] unified keymap entries
@@ -54,11 +69,11 @@ M.collect = function(declared_keymaps)
     if ok then
       for _, km in ipairs(buf_maps) do
         if km.desc and km.desc ~= "" and not km.lhs:find("<Plug>") then
-          local dedup_key = mode .. "|" .. km.lhs
+          local dedup_key = mode .. "|" .. canonical_lhs(km.lhs)
           local source_file, source_line = get_source_info(km)
           seen[dedup_key] = {
             type = "keymap",
-            key = km.lhs,
+            key = normalize_lhs(km.lhs),
             mode = mode,
             desc = km.desc,
             source_file = source_file,
@@ -85,7 +100,7 @@ M.collect = function(declared_keymaps)
           local source_file, source_line = get_source_info(km)
           seen[dedup_key] = {
             type = "keymap",
-            key = km.lhs,
+            key = normalize_lhs(km.lhs),
             mode = mode,
             desc = km.desc,
             source_file = source_file,
@@ -101,11 +116,11 @@ M.collect = function(declared_keymaps)
 
   -- 3. Merge lazy-declared keymaps (lowest priority, skip if runtime exists)
   for _, dk in ipairs(declared_keymaps or {}) do
-    local dedup_key = dk.mode .. "|" .. dk.lhs
+    local dedup_key = dk.mode .. "|" .. canonical_lhs(dk.lhs)
     if not seen[dedup_key] then
       seen[dedup_key] = {
         type = "keymap",
-        key = dk.lhs,
+        key = normalize_lhs(dk.lhs),
         mode = dk.mode,
         desc = dk.desc,
         source_file = dk.source_file,
@@ -125,9 +140,37 @@ M.collect = function(declared_keymaps)
     end
   end
 
+  -- Group entries by canonical key to merge modes
+  local by_key = {}
+  for _, entry in pairs(seen) do
+    local canon = canonical_lhs(entry.key)
+    if by_key[canon] then
+      -- Add mode to existing entry
+      by_key[canon].modes[entry.mode] = true
+      -- Prefer enriched data (plugin info, tags, tip)
+      if not by_key[canon].plugin and entry.plugin then
+        by_key[canon].plugin = entry.plugin
+        by_key[canon].tags = entry.tags
+        by_key[canon].tip = entry.tip
+        by_key[canon].plugin_dir = entry.plugin_dir
+      end
+    else
+      entry.modes = { [entry.mode] = true }
+      by_key[canon] = entry
+    end
+  end
+
   -- Build display strings and collect
   local results = {}
-  for _, entry in pairs(seen) do
+  for _, entry in pairs(by_key) do
+    -- Build fixed-width mode indicator: [nvios] with _ for inactive
+    local has = entry.modes
+    local n = has["n"] and "n" or "_"
+    local v = (has["x"] or has["v"]) and "v" or "_"
+    local i = has["i"] and "i" or "_"
+    local o = has["o"] and "o" or "_"
+    local s = has["s"] and "s" or "_"
+    entry.mode = n .. v .. i .. o .. s
     entry.display = "[keymap] " .. entry.key .. "  " .. entry.mode .. "  " .. entry.desc
     table.insert(results, entry)
   end
