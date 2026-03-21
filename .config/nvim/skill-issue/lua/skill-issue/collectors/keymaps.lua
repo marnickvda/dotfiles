@@ -50,6 +50,16 @@ local function normalize_lhs(lhs)
   return lhs
 end
 
+--- Resolve <leader> back to the actual key for ordinal matching
+--- e.g., "<leader>ff" with space leader -> " ff"
+local function resolve_leader(key)
+  if not key:find("<leader>") then
+    return nil
+  end
+  local leader = vim.g.mapleader or "\\"
+  return key:gsub("<leader>", leader)
+end
+
 --- Convert lhs to a canonical byte form for dedup comparison
 --- This handles all encoding differences (literal space, <Space>, <leader>, etc.)
 local function canonical_lhs(lhs)
@@ -165,8 +175,12 @@ M.collect = function(declared_keymaps)
     local s = has["s"] and "s" or "_"
     entry.mode = n .. v .. i .. o .. s
     entry.display = "[keymap] " .. entry.key .. "  " .. entry.mode .. "  " .. entry.desc
-    -- Include plugin name in ordinal so fuzzy search by plugin name finds associated keymaps
-    entry.ordinal = entry.display .. (entry.plugin and ("  " .. entry.plugin) or "")
+    -- Include plugin name and resolved leader key in ordinal for fuzzy search
+    -- so typing " ff" matches <leader>ff when leader is space
+    local resolved = resolve_leader(entry.key)
+    entry.ordinal = entry.display
+      .. (entry.plugin and ("  " .. entry.plugin) or "")
+      .. (resolved and ("  " .. resolved) or "")
     table.insert(results, entry)
   end
 
