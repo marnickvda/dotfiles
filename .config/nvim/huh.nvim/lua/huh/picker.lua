@@ -86,6 +86,7 @@ local function find_help_doc(plugin_dir)
 end
 
 --- Wrap text to fit within a given width, preserving a prefix on each line
+--- Uses strdisplaywidth for correct multi-byte character handling
 local function wrap_text(text, width, prefix)
 	prefix = prefix or ""
 	local available = width - vim.fn.strdisplaywidth(prefix)
@@ -100,9 +101,24 @@ local function wrap_text(text, width, prefix)
 			table.insert(wrapped, prefix .. remaining)
 			break
 		end
-		-- Find last space within available width
-		local break_at = available
-		local space_pos = remaining:sub(1, available):find("%s[^%s]*$")
+		-- Walk UTF-8 characters to find byte position where display width exceeds available
+		local byte_at = 0
+		local dw = 0
+		local i = 1
+		while i <= #remaining do
+			local char_end = vim.str_utf_end(remaining, i)
+			local ch = remaining:sub(i, i + char_end)
+			local next_dw = dw + vim.fn.strdisplaywidth(ch)
+			if next_dw > available then
+				break
+			end
+			dw = next_dw
+			byte_at = i + char_end
+			i = byte_at + 1
+		end
+		-- Find last space within that byte range for word wrapping
+		local break_at = byte_at
+		local space_pos = remaining:sub(1, byte_at):find("%s[^%s]*$")
 		if space_pos then
 			break_at = space_pos
 		end
@@ -201,6 +217,10 @@ local function make_previewer()
 
 			if e.type == "plugin" then
 				local fields = { e.plugin or "unknown" }
+				if e.desc and e.desc ~= e.plugin then
+					table.insert(fields, "")
+					table.insert(fields, e.desc)
+				end
 				local card_lines, hls = build_card("Plugin", fields, width)
 				vim.list_extend(lines, card_lines)
 				vim.list_extend(card_hls, hls)
@@ -371,7 +391,7 @@ M.open = function()
 
 	pickers
 		.new({}, {
-			prompt_title = "Search keymap/plugin",
+			prompt_title = "huh?",
 			finder = finders.new_table({
 				results = all_entries,
 				entry_maker = (function()
@@ -464,7 +484,7 @@ M.open = function()
 			}),
 			sorter = conf.generic_sorter({}),
 			previewer = make_previewer(),
-			attach_mappings = function(prompt_bufnr, map)
+			attach_mappings = function(prompt_bufnr, _)
 				actions.select_default:replace(function()
 					local selection = require("telescope.actions.state").get_selected_entry()
 					actions.close(prompt_bufnr)
