@@ -19,6 +19,8 @@ alias pip=pip3
 # https://www.youtube.com/watch?v=ua1FAlHt_Ys&t=232s
 alias weather="curl http://wttr.in/"
 
+alias passgen="openssl rand -base64 32"
+
 fast-pr() {
   local open_browser=false
   local desc=""
