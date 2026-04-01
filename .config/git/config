@@ -1,5 +1,6 @@
 [include]
     path = ~/.config/git/credentials
+    path = ~/.config/git/config.profile
 
 [core]
     editor = nvim
@@ -11,6 +12,7 @@
 
 [gpg "ssh"]
   program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
+  allowedSignersFile = ~/.ssh/allowed_signers
 
 [commit]
   gpgsign = true
@@ -138,14 +140,15 @@
     # Usage: git fast-squash [base=main]
     fast-squash = "!f() { \
         base=$(git merge-base ${1:-main} HEAD); \
-        echo "Branching point: $base"; \
-        echo "Current commit message: $(git log --format=%B -n 1 HEAD)"; \
-        read -p "Enter new commit message (leave empty to keep current): " new_msg; \
-        if [ -z "$new_msg" ]; then \
+        echo \"Branching point: $base\"; \
+        echo \"Current commit message: $(git log --format=%B -n 1 HEAD)\"; \
+        printf \"Enter new commit message (leave empty to keep current): \"; \
+        read new_msg; \
+        if [ -z \"$new_msg\" ]; then \
             new_msg=$(git log --format=%B -n 1 HEAD | head -n 1); \
         fi; \
         git reset --soft $base; \
-        git commit -m "$new_msg"; \
+        git commit -m \"$new_msg\"; \
     }; f"
 
     # Create new branch with one third the characters
@@ -229,3 +232,7 @@
         fi; \
         unset f; \
     }; f"
+
+    # Show recently checked out branches
+    # Usage: git recent
+    recent = for-each-ref --count=15 --sort=-committerdate refs/heads/ --format='%(refname:short)'

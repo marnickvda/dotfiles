@@ -45,8 +45,9 @@ export MANWIDTH=128
 # Load development tools (pyenv, nvm, deno, etc.)
 source "$HOME/.config/zsh/tools.zsh"
 
-# Load aliases
+# Load aliases and functions
 [[ -f "$HOME/.config/zsh/aliases.zsh" ]] && source "$HOME/.config/zsh/aliases.zsh"
+for f in "$HOME"/.config/zsh/functions/*.zsh(N); do source "$f"; done
 
 # Load machine-specific configuration based on $PROFILE_DIR
 PROFILE_DIR="$HOME/.config/zsh/profiles"
@@ -55,19 +56,3 @@ if [[ -n "$ZSH_PROFILE" ]]; then
     [[ -f "$PROFILE_FILE" ]] && source "$PROFILE_FILE" || echo "No profile found for type: $ZSH_PROFILE"
 fi
 
-# Update Brewfile whenever something changes in it.
-brew() {
-    local dump_commands=('install' 'uninstall')
-    local main_command="$1"
-
-    command brew "$@"
-
-    if [[ " ${dump_commands[*]} " == *" $main_command "* ]]; then
-        local suffix="${ZSH_PROFILE:+.${ZSH_PROFILE}}"
-        local brewfile="${HOME}/.config/homebrew/Brewfile${suffix}"
-        (
-            command brew bundle dump --file="$brewfile" --force >/dev/null 2>&1
-        ) &
-        disown
-    fi
-}

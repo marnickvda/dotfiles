@@ -10,5 +10,7 @@ return {
         { "<leader>pr", "<cmd>Octo pr list<cr>", desc = "Octo: list PRs" },
         { "<leader>isu", "<cmd>Octo issue list<cr>", desc = "Octo: list issues" },
     },
-    opts = {},
+    opts = {
+        ssh_aliases = { ["~/.ssh/id_ed25519"] = "github.com" },
+    },
 }
