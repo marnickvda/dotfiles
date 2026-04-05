@@ -140,13 +140,43 @@ Leader key: `<Space>`
 | `J` | v    | Move selected lines down |
 | `K` | v    | Move selected lines up   |
 
-### Treesitter Parser Management
+### Treesitter Text Objects
 
-| Command              | Action                              |
-| -------------------- | ----------------------------------- |
-| `:ParserUpdate`      | Recompile all treesitter parsers    |
-| `:ParserInstall <l>` | Install a specific language parser  |
-| `:ParserClean`       | Remove parsers not in config list   |
+Select with `v` then use these in operator-pending mode:
+
+| Key         | Action                    |
+| ----------- | ------------------------- |
+| `am` / `im` | Outer/inner function      |
+| `ac` / `ic` | Outer/inner class         |
+| `af` / `if` | Outer/inner function call |
+| `aa` / `ia` | Outer/inner parameter     |
+| `ai` / `ii` | Outer/inner conditional   |
+| `al` / `il` | Outer/inner loop          |
+| `a=` / `i=` | Outer/inner assignment    |
+| `l=` / `r=` | Assignment LHS / RHS      |
+
+### Treesitter Movement
+
+| Key         | Action                   |
+| ----------- | ------------------------ |
+| `]m` / `[m` | Next/prev function start |
+| `]M` / `[M` | Next/prev function end   |
+| `]]` / `[[` | Next/prev class start    |
+| `][` / `[]` | Next/prev class end      |
+
+### Treesitter Swap
+
+| Key          | Action                       |
+| ------------ | ---------------------------- |
+| `<leader>pa` | Swap parameter with next     |
+| `<leader>pA` | Swap parameter with previous |
+
+### Incremental Selection
+
+| Key         | Mode | Action                        |
+| ----------- | ---- | ----------------------------- |
+| `<C-space>` | n    | Start selection / expand node |
+| `<BS>`      | v    | Shrink selection              |
 
 ## Misc
 
