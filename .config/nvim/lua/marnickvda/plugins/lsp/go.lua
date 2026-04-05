@@ -1,9 +1,10 @@
 return {
     "olexsmir/gopher.nvim",
     ft = "go",
-    dependencies = {
-        "nvim-lua/plenary.nvim",
-        "nvim-treesitter/nvim-treesitter",
-    },
+    -- branch = "develop"
+    -- (optional) updates the plugin's dependencies on each update
+    build = function()
+        vim.cmd.GoInstallDeps()
+    end,
     opts = {},
 }
