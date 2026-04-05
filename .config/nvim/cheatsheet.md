@@ -223,7 +223,6 @@ Select with `v` then use these in operator-pending mode:
 - **LSP**: `ts_ls` (TypeScript language server) + `eslint`
 - **Formatter**: `prettier` (format with `<leader>mf`)
 - **CSS**: `tailwindcss` LSP active in `.jsx`/`.tsx` files
-- **Autotag**: Auto-close and rename HTML/JSX tags
 
 ### Common Workflow
 

@@ -28,8 +28,6 @@ lua/marnickvda/
 │   ├── navigation/        # File/tree navigation (telescope, nvim-tree)
 │   ├── treesitter/        # Treesitter and related plugins
 │   │   ├── treesitter.lua
-│   │   ├── highlight.lua
-│   │   ├── textobjects.lua
 │   │   └── treesitter-context.lua
 │   ├── ui/                # Visual and interface plugins (colorscheme, statusline, etc.)
 │   └── init.lua           # Loads plugin imports from all subfolders
