@@ -56,3 +56,10 @@ if [[ -n "$ZSH_PROFILE" ]]; then
     [[ -f "$PROFILE_FILE" ]] && source "$PROFILE_FILE" || echo "No profile found for type: $ZSH_PROFILE"
 fi
 
+
+# bun completions
+[ -s "/Users/marnick.van.der.arend/.bun/_bun" ] && source "/Users/marnick.van.der.arend/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"

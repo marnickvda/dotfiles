@@ -1,6 +1,5 @@
 #!/bin/sh
-
-# post-checkout hook: auto-pull when switching to main
+command -v git-lfs >/dev/null 2>&1 && git lfs post-checkout "$@"
 
 # $1 = previous HEAD, $2 = new HEAD, $3 = 1 if branch checkout (0 if file checkout)
 branch_checkout=$3

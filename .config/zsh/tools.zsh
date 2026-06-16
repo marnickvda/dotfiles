@@ -24,8 +24,8 @@ export NVM_DIR="$HOME/.nvm"
 export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:/usr/local/sbin:$PATH"
 export PATH="$PATH:$(go env GOPATH)/bin"
 
-if [[ -d "/opt/homebrew/opt/postgresql@15/bin" ]]; then
-    export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"
+if [[ -d "/opt/homebrew/opt/postgresql@17/bin" ]]; then
+    export PATH="/opt/homebrew/opt/postgresql@17/bin:$PATH"
 fi
 
 if [[ -d "/opt/homebrew/opt/openjdk@21/bin" ]]; then

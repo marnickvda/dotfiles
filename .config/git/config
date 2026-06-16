@@ -55,12 +55,6 @@
 [merge]
     conflictstyle = zdiff3
 
-[filter "lfs"]
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
-	required = true
-
 [alias]
     # List all git aliases with their descriptions
     # Usage: git alias-ls [filter]
@@ -236,3 +230,8 @@
     # Show recently checked out branches
     # Usage: git recent
     recent = for-each-ref --count=15 --sort=-committerdate refs/heads/ --format='%(refname:short)'
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true

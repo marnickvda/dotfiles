@@ -2,3 +2,5 @@
 .config/iterm2/AppSupport
 
 .DS_Store
+
+share/
