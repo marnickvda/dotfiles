@@ -26,3 +26,6 @@ install.sh
 
 scripts/*
 assets/*
+
+\.DS_Store
+^/share

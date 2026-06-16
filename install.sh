@@ -12,6 +12,10 @@ fi
 # into $HOME before anything else tries to read them.
 echo "Stowing dotfiles..."
 brew install stow
+# Pre-create dirs that mix our stowed files with externally-managed content
+# (e.g. the agent skill manager). This forces stow to descend and symlink
+# individual entries instead of folding the whole tree into one symlink.
+mkdir -p "$HOME/.agents/skills"
 stow .
 
 echo "Installing base packages..."
