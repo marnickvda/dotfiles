@@ -33,3 +33,7 @@ vim.opt.colorcolumn = "80"
 
 vim.o.title = true
 vim.o.titlestring = "%t"
+
+-- Let treesitter-textobjects own ]] [[ ]m [m etc. instead of the regex-based ftplugin maps.
+vim.g.no_go_maps = 1
+vim.g.no_python_maps = 1

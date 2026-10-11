@@ -1,68 +1,56 @@
 local M = {}
 
+function M.peek_inlay_hints(buf)
+    if vim.lsp.inlay_hint.is_enabled({ bufnr = buf }) then
+        return
+    end
+    vim.lsp.inlay_hint.enable(true, { bufnr = buf })
+    local group = vim.api.nvim_create_augroup("InlayHintPeek" .. buf, { clear = true })
+    vim.api.nvim_create_autocmd({ "CursorMoved", "InsertEnter", "BufLeave", "WinScrolled" }, {
+        group = group,
+        buffer = buf,
+        callback = function()
+            vim.api.nvim_del_augroup_by_id(group)
+            vim.lsp.inlay_hint.enable(false, { bufnr = buf })
+        end,
+    })
+end
+
 function M.setup_keymaps(event)
-    -- local client = vim.lsp.get_client_by_id(event.data.client_id)
-    -- local client_name = client and client.name or "unknown"
-    -- print("🔗 LSP attached to buffer " .. event.buf .. " with client: " .. client_name)
-
     local telescope = require("telescope.builtin")
+    local buf = event.buf
 
-    local keymaps = {
-        ["K"] = { vim.lsp.buf.hover, "LSP: Hover documentation" },
-        ["gD"] = { vim.lsp.buf.declaration, "LSP: Go to declaration" },
-        ["gd"] = { telescope.lsp_definitions, "LSP: Go to definition" },
-        ["gi"] = { telescope.lsp_implementations, "LSP: Go to implementation" },
-        ["go"] = { telescope.lsp_type_definitions, "LSP: Go to type definition" },
-        ["gr"] = { telescope.lsp_references, "LSP: Go to references" },
-        ["gK"] = { vim.lsp.buf.signature_help, "LSP: Signature help" },
-    }
+    local function map(lhs, rhs, desc)
+        vim.keymap.set("n", lhs, rhs, { buffer = buf, desc = desc })
+    end
 
-    local leader_keymaps = {
-        m = {
-            name = "LSP Actions",
-            R = {
-                function()
-                    vim.lsp.buf.code_action({ apply = true })
-                end,
-                "Apply first code action",
-            },
-            i = {
-                function()
-                    vim.lsp.buf.code_action({
-                        context = {
-                            only = { "source.organizeImports" },
-                        },
-                        apply = true,
-                    })
-                end,
-                "Organize imports",
-            },
-            n = { vim.lsp.buf.rename, "Rename symbol" },
-            r = { telescope.lsp_code_actions, "Code actions" },
-        },
-        l = {
-            name = "LSP Info",
-            s = { telescope.lsp_document_symbols, "Document symbols" },
-            S = { telescope.lsp_workspace_symbols, "Workspace symbols" },
-            d = {
-                function()
-                    telescope.diagnostics({ bufnr = 0 })
-                end,
-                "Document diagnostics",
-            },
-            D = { telescope.diagnostics, "Workspace diagnostics" },
-        },
-    }
+    map("K", vim.lsp.buf.hover, "LSP: Hover documentation")
+    map("gD", vim.lsp.buf.declaration, "LSP: Go to declaration")
+    map("gd", telescope.lsp_definitions, "LSP: Go to definition")
+    map("gi", telescope.lsp_implementations, "LSP: Go to implementation")
+    map("go", telescope.lsp_type_definitions, "LSP: Go to type definition")
+    map("gr", telescope.lsp_references, "LSP: Go to references")
+    map("gK", vim.lsp.buf.signature_help, "LSP: Signature help")
 
-    -- Register with which-key
-    local ok, wk = pcall(require, "which-key")
-    if ok then
-        -- print("🔑 Registering keymaps with which-key")
-        wk.register(keymaps, { buffer = event.buf })
-        wk.register(leader_keymaps, { prefix = "<leader>", buffer = event.buf })
-        -- print("✅ LSP keymaps registered with which-key for buffer " .. event.buf)
-    else
-        print("⚠️  which-key not available")
+    map("<leader>mR", function()
+        vim.lsp.buf.code_action({ apply = true })
+    end, "Apply first code action")
+    map("<leader>mi", function()
+        vim.lsp.buf.code_action({ context = { only = { "source.organizeImports" } }, apply = true })
+    end, "Organize imports")
+    map("<leader>mn", vim.lsp.buf.rename, "Rename symbol")
+    map("<leader>mr", vim.lsp.buf.code_action, "Code actions")
+    map("<leader>mc", vim.lsp.codelens.run, "Run code lens")
+    map("<leader>mh", function()
+        M.peek_inlay_hints(buf)
+    end, "Peek inlay hints (until cursor moves)")
+    map("<leader>mH", function()
+        vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = buf }), { bufnr = buf })
+    end, "Toggle inlay hints")
+
+    local client = vim.lsp.get_client_by_id(event.data.client_id)
+    if client and client:supports_method("textDocument/codeLens") then
+        vim.lsp.codelens.enable(true, { bufnr = buf })
     end
 end
 

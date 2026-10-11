@@ -51,6 +51,15 @@ return {
             }),
         })
 
+        require("marnickvda.go.struct_tags").register()
+        cmp.setup.filetype("go", {
+            sources = {
+                { name = "go_struct_tags" },
+                { name = "nvim_lsp" },
+                { name = "luasnip" },
+            },
+        })
+
         cmp.setup.cmdline("/", {
             mapping = cmp.mapping.preset.cmdline(),
             sources = { { name = "buffer" } },

@@ -1,14 +1,15 @@
 vim.g.mapleader = " "
+vim.g.maplocalleader = "\\"
 
 -- 🏗 File Explorer
 vim.keymap.set("n", "<leader>e", function()
     require("nvim-tree.api").tree.toggle()
 end, { desc = "Open my file tree explorer", noremap = true, silent = true })
 
-vim.keymap.set("n", "<leader>mt", function()
+vim.keymap.set("n", "<leader>fo", function()
     local path = vim.fn.expand("%:p:h")
     vim.fn.jobstart("open " .. path, { detach = true })
-end, { desc = "Open file tree in Finder" })
+end, { desc = "Open file directory in Finder" })
 
 -- 📑 Navigation Enhancements
 vim.keymap.set("i", "<C-l>", "<C-o>l", { desc = "Move cursor right in insert mode" })
@@ -40,7 +41,7 @@ vim.keymap.set("i", "<C-c>", "<Esc>", { desc = "Use <C-c> as <Esc>" })
 vim.keymap.set("n", "Q", "<nop>", { desc = "Disable Ex mode" })
 
 -- 🎯 LSP Actions
-vim.keymap.set("n", "<leader>lsp", "<cmd>LspRestart<cr>", { desc = "Restart LSP" })
+vim.keymap.set("n", "<leader>lr", "<cmd>lsp restart<cr>", { desc = "Restart LSP" })
 
 -- 🔍 Quick Search & Replace
 vim.keymap.set(
@@ -51,7 +52,7 @@ vim.keymap.set(
 )
 
 -- 🛠 Make Current File Executable
-vim.keymap.set("n", "<leader>mX", "<cmd>!chmod +x %<CR>", { silent = true, desc = "Make file executable" })
+vim.keymap.set("n", "<leader>fx", "<cmd>!chmod +x %<CR>", { silent = true, desc = "Make file executable" })
 
 -- 🔄 Source Neovim Config
 vim.keymap.set("n", "<leader><leader>", function()

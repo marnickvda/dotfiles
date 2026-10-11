@@ -12,8 +12,22 @@ return {
                 "isort",
                 "sqlfmt",
 
+                "gofumpt",
+                "goimports",
+
                 -- Linters
                 "flake8",
+                "golangci-lint",
+
+                -- Go tooling
+                "gomodifytags",
+                "gotests",
+                "impl",
+                "iferr",
+                "delve",
+
+                -- Python tooling
+                "debugpy",
             },
             auto_update = true,
             run_on_start = true,

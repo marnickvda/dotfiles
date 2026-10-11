@@ -6,26 +6,16 @@ return {
 
         conform.setup({
             formatters = {
-                flake8 = {
-                    command = "flake8",
-                    args = { "--format=%(row)d,%(col)d,%(code).1s,%(code)s: %(text)s", "-" },
-                    stdin = true,
-                    parse = function(output)
-                        local diagnostics = {}
-                        for line in vim.gsplit(output, "\n") do
-                            local row, col, severity, code, message = line:match("^(%d+),(%d+),(%a),([^:]+): (.+)$")
-                            if row then
-                                table.insert(diagnostics, {
-                                    lnum = tonumber(row) - 1,
-                                    col = tonumber(col) - 1,
-                                    severity = severity == "E" and 1 or 2, -- 1 = Error, 2 = Warning
-                                    source = "flake8",
-                                    code = code,
-                                    message = message,
-                                })
+                isort = {
+                    condition = function(_, ctx)
+                        local root = vim.fs.root(ctx.filename, { "pyproject.toml", "setup.cfg", ".isort.cfg", ".git" })
+                        for _, name in ipairs({ ".isort.cfg", "pyproject.toml", "setup.cfg" }) do
+                            local ok, lines = pcall(vim.fn.readfile, vim.fs.joinpath(root or "", name))
+                            if ok and table.concat(lines, "\n"):find("isort", 1, true) then
+                                return true
                             end
                         end
-                        return diagnostics
+                        return false
                     end,
                 },
             },
@@ -45,7 +35,7 @@ return {
                 graphql = { "prettier" },
                 lua = { "stylua" },
                 python = { "isort", "black" },
-                go = { "gofmt" },
+                go = { "goimports", "gofumpt" },
                 sql = { "sqlfmt" },
             },
             -- format_on_save = {

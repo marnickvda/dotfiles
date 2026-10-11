@@ -2,17 +2,24 @@ vim.api.nvim_create_autocmd("FileType", {
     pattern = "go",
     group = vim.api.nvim_create_augroup("GoKeybinds", { clear = true }),
     callback = function()
-        -- Insert Go error return
-        vim.keymap.set("n", "<leader>gee", "oif err != nil {<CR>}<Esc>Oreturn err<Esc>", { buffer = true, desc = "Insert Go error return" })
+        local function map(mode, lhs, rhs, desc)
+            vim.keymap.set(mode, "<localleader>" .. lhs, rhs, { buffer = true, desc = desc })
+        end
 
-        -- Insert Go assert error check
-        vim.keymap.set("n", "<leader>gea", "oassert.NoError(err, \"\")<Esc>F\";a", { buffer = true, desc = "Insert Go assert error check" })
+        map("n", "ee", "oif err != nil {<CR>}<Esc>Oreturn err<Esc>", "Go: if err return")
+        map("n", "ea", 'oassert.NoError(err, "")<Esc>F";a', "Go: assert.NoError")
+        map("n", "ef", 'oif err != nil {<CR>}<Esc>Olog.Fatalf("error: %s\\n", err.Error())<Esc>jj', "Go: if err log.Fatalf")
+        map("n", "el", 'oif err != nil {<CR>}<Esc>O.logger.Error("error", "error", err)<Esc>F.;i', "Go: if err logger.Error")
+        map("n", "ex", "<cmd>GoIfErr<CR>", "Go: if err (iferr)")
 
-        -- Insert Go fatal log error
-        vim.keymap.set("n", "<leader>gef", "oif err != nil {<CR>}<Esc>Olog.Fatalf(\"error: %s\\n\", err.Error())<Esc>jj", { buffer = true, desc = "Insert Go fatal log error" })
-
-        -- Insert Go structured logging error
-        vim.keymap.set("n", "<leader>gel", "oif err != nil {<CR>}<Esc>O.logger.Error(\"error\", \"error\", err)<Esc>F.;i", { buffer = true, desc = "Insert Go structured logging error" })
-    end
+        map({ "n", "x" }, "t", ":GoTagAdd json<CR>", "Go: add json tags")
+        map({ "n", "x" }, "T", ":GoTagAdd ", "Go: add tags (prompt)")
+        map({ "n", "x" }, "r", ":GoTagRm ", "Go: remove tags (prompt)")
+        map("n", "i", ":GoImpl ", "Go: implement interface (prompt)")
+        map("n", "u", "<cmd>GoTestAdd<CR>", "Go: generate test for func")
+        map("n", "U", "<cmd>GoTestsAll<CR>", "Go: generate tests for file")
+        map("n", "c", "<cmd>GoCmt<CR>", "Go: doc comment")
+        map("n", "m", "<cmd>!go mod tidy<CR>", "Go: mod tidy")
+        map("n", "f", "<cmd>!go fix ./...<CR>", "Go: go fix (modernizers)")
+    end,
 })
-

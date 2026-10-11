@@ -28,6 +28,8 @@ local ensure_installed = {
     "markdown_inline",
     "ron",
     "terraform",
+    "python",
+    "toml",
 }
 
 local ts_filetypes = {
@@ -57,6 +59,8 @@ local ts_filetypes = {
     "ron",
     "terraform",
     "terraform-vars",
+    "python",
+    "toml",
 }
 
 return {
