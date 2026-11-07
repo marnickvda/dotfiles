@@ -6,7 +6,7 @@ export HOMEBREW_NO_ENV_HINTS=true
 export STARSHIP_CONFIG="$HOME/.config/zsh/starship.toml"
 command -v starship &>/dev/null && eval "$(starship init zsh)"
 
-# load zplug plugins
+# load antidote plugins
 source "$HOME/.config/zsh/plugins.zsh"
 
 setopt AUTO_CD              # cd by just typing dir name
@@ -21,14 +21,8 @@ setopt INTERACTIVE_COMMENTS # allow comments in interactive shell
 # Add custom completions directory to the function search path
 fpath=($HOME/completions $fpath)
 
-# Load Zsh's native completion system
-autoload -Uz compinit && compinit
-
-# Enable support for Bash-style completion scripts
+# compinit runs once before the first prompt (getantidote/use-omz)
 autoload bashcompinit && bashcompinit
-
-export ZSH_COMPDUMP="$HOME/.cache/zsh/.zcompdump-$HOST"
-mkdir -p "$(dirname $ZSH_COMPDUMP)"
 
 # Use vim, always.
 if [[ -n $SSH_CONNECTION ]]; then

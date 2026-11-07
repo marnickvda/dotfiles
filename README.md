@@ -11,7 +11,7 @@ modularity in its configuration.
 1. [homebrew](https://brew.sh/) as MacOS system package manager
 1. [NeoVim](https://neovim.io/) as editor with configuration outlined [here](./.config/nvim/lua/marnickvda/README.md)
 1. [iterm2](https://iterm2.com/) running `zsh` with [starship](https://starship.rs/) and the package
-   manager [zplug](https://github.com/zplug/zplug).
+   manager [antidote](https://antidote.sh/).
 1. [tmux](https://github.com/tmux/tmux/wiki) as terminal multiplexer with
    [tpm](https://github.com/tmux-plugins/tpm) as plugin manager.
 
